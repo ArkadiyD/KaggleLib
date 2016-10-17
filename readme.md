@@ -1,16 +1,19 @@
-Description of functions.
+My library of most useful functions to participate in Kaggle competitions. 
 
-Data hashing. Functions to hash dataframes into sparse matrices.
+Supports types of models:
+1. Scikit-Learm models
+2. XGBoost models (defined as dicts of parameters)
+3. Keras models (defined as dicts of parameters)
 
-  get_hash_data(train, test, colnames_to_hash, colnames_not_to_hash = [], type = 'tfidf', verbose = True)
-    hashes train and test datasets into a sparse matrices
-    
-    train: Pandas dataframe; input dataframe to hash
-    test: Pandas dataframe; input dataframe to apply hashing based on train dataset
-    colnames_to_hash: list of strings; list of column names to be hashed
-    colnames_not_to_hash: list of strings; lsit of column names to be remained without hashing
-    type: string; 'tfidf' - hashing with TfidfVectorizer(min_df=1),'tfidf_modified' - hashing with TfidfVectorizer(min_df=1, ngram_range=(1,1),sublinear_tf = True,binary = True, norm = 'l2'), 'counter' - hashing with CountVectorizer(min_df=1, binary=1)
-    verbose: boolean, display messages or not
-    
-  get_hash_data_simple(train, test, colnames_to_hash, type = 'tfidf', verbose = True)
-  get_hash_data_memory_efficient(train, test, colnames_to_hash, type = 'tfidf', verbose = True)
+Supports tasks:
+1. Binary classification
+2. Multiclass classification
+3. Regression
+
+Contains functions for:
+1. Data hashing (incl. memory-efficient versions)
+2. Training XGBoost models (both trees and linear) and predicting
+3. Training Keras models and predicting
+4. Finding best params of XGBoost models by HyperOpt library
+5. Cross-validation performance evaluation (Scikit-Learn models, Keras models, XGBoost models)
+6. Building stacks of models
