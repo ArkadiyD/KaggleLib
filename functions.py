@@ -1,4 +1,3 @@
-
 import pandas as pd
 import numpy as np
 
@@ -80,13 +79,21 @@ def get_hash_data_simple(train, test, colnames_to_hash, type = 'tfidf', verbose 
 	elif type == 'counter2':
 		tfv = CountVectorizer(min_df = 1, binary = False)
 
-	train = train[colnames_to_hash].astype(np.str).apply(lambda x: ','.join(s for s in x), axis=1).fillna('Missing')
+	try:
+		train = train[colnames_to_hash].astype(np.str).apply(lambda x: ','.join(s for s in x), axis=1).fillna('Missing')
+	except Exception:
+		train = train[colnames_to_hash].astype('U').apply(lambda x: ','.join(s for s in x), axis=1).fillna('Missing')
+		
 	if verbose:
 		print ('-'*30,'df for hashing','\n',train)
 	
 	tfv.fit(train)
 
-	test = test[colnames_to_hash].astype(np.str).apply(lambda x: ','.join(s for s in x), axis=1).fillna('Missing')
+	try:
+		test = test[colnames_to_hash].astype(np.str).apply(lambda x: ','.join(s for s in x), axis=1).fillna('Missing')
+	except Exception:
+		test = test[colnames_to_hash].astype('U').apply(lambda x: ','.join(s for s in x), axis=1).fillna('Missing')
+	
 	test = tfv.transform(test)
 	
 	if verbose:
@@ -111,9 +118,13 @@ def get_hash_data(train, test, colnames_to_hash, colnames_not_to_hash = [], type
 	else:
 		tfv = CountVectorizer(min_df=1, binary=1)
 
-	df = df[colnames_to_hash].astype(np.str).apply(lambda x: ','.join(s for s in x), axis=1).fillna('Missing')
-	df_all = df_all[colnames_to_hash].astype(np.str).apply(lambda x: ','.join(s for s in x), axis=1).fillna('Missing')
-	
+	try:
+		df = df[colnames_to_hash].astype(np.str).apply(lambda x: ','.join(s for s in x), axis=1).fillna('Missing')
+		df_all = df_all[colnames_to_hash].astype(np.str).apply(lambda x: ','.join(s for s in x), axis=1).fillna('Missing')
+	except Exception:
+		df = df[colnames_to_hash].astype('U').apply(lambda x: ','.join(s for s in x), axis=1).fillna('Missing')
+		df_all = df_all[colnames_to_hash].astype('U').apply(lambda x: ','.join(s for s in x), axis=1).fillna('Missing')
+
 	if verbose:
 		print ('-'*30,'df for hashing','\n',df)
 	
@@ -147,7 +158,7 @@ def get_hash_data(train, test, colnames_to_hash, colnames_not_to_hash = [], type
 	return train, test
 
 
-def find_params_xgb(train, Y, type = 'linear', folds = 5, total_evals = 50, sparse = True):
+def find_params_xgb(train, Y, type = 'linear', objective='', eval_metric = '', n_classes = 2, folds = 5, total_evals = 50, sparse = True, scale_pos_weight = 1):
 	"""
 	train dataset, labels, type -> dict of optimal params
 	"""
@@ -173,7 +184,9 @@ def find_params_xgb(train, Y, type = 'linear', folds = 5, total_evals = 50, spar
 				y_val = Y[val_index]
 
 				X_train = X_train.tocsc()[:, :X_val.shape[1]].tocoo()
-			
+				
+				print X_train.shape, X_val.shape, y_train.shape, y_val.shape
+
 				dtrain = xgb.DMatrix(X_train.tocsc(), y_train, missing = np.nan)
 				dvalid = xgb.DMatrix(X_val.tocsc(), y_val, missing = np.nan)
 	
@@ -188,7 +201,8 @@ def find_params_xgb(train, Y, type = 'linear', folds = 5, total_evals = 50, spar
 			
 				dtrain = xgb.DMatrix(X_train, y_train, missing = np.nan)
 				dvalid = xgb.DMatrix(X_val, y_val, missing = np.nan)
-				
+			
+
 			watchlist = [(dtrain, 'train'), (dvalid, 'eval')]
 			if 'max_depth' in params:
 				params['max_depth'] = int(params['max_depth'])
@@ -203,36 +217,78 @@ def find_params_xgb(train, Y, type = 'linear', folds = 5, total_evals = 50, spar
 		CV_score /= float(CVs)
 		print ("\tCV_score {0}\n\n".format(CV_score))
 
-		return {'loss': CV_score, 'status': STATUS_OK}
-
+		if params['eval_metric'] != 'auc':
+			return {'loss': CV_score, 'status': STATUS_OK}
+		else:
+			print -CV_score
+			return {'loss': -CV_score, 'status': STATUS_OK}
+			
 	def optimize(trials):
-	
+		
+		eval_metric_ = eval_metric
+		objective_ = objective
+
 		if type == 'linear':
-	
+			
+			if eval_metric == '':
+				eval_metric_ = 'mlogloss'
+
+			if objective == '':
+				objective_ = 'multi:softprob'
+
 			space = {
 					'eta': hp.quniform('eta', 0.003, 0.1, 0.01),
 					'lambda' : hp.quniform('lambda', 0.1, 0.7, 0.15),
 					'lambda_bias' : hp.quniform('lambda_bias', 0.1, 0.7, 0.15),
 					'alpha' : hp.quniform('alpha', 0.1, 0.5, 0.1),
+					'scale_pos_weight' : scale_pos_weight,
 					'booster': 'gblinear',
-					'num_class' : 12,
-					'eval_metric': 'mlogloss',
-					'objective': 'multi:softprob',
+					'num_class' : n_classes,
+					'eval_metric': eval_metric_,
+					'objective': objective_,
 					'nthread' : 8,
 					'silent' : 0,
 					'seed': 7
 					 }
 
-		if type == 'linear_reg':
-	
+		elif type == 'linear_softmax':
+			
+			if eval_metric == '':
+				eval_metric_ = 'mlogloss'
+			if objective == '':
+				objective_ = 'multi:softmax'
+
 			space = {
 					'eta': hp.quniform('eta', 0.003, 0.1, 0.01),
 					'lambda' : hp.quniform('lambda', 0.1, 0.7, 0.15),
 					'lambda_bias' : hp.quniform('lambda_bias', 0.1, 0.7, 0.15),
 					'alpha' : hp.quniform('alpha', 0.1, 0.5, 0.1),
+					'scale_pos_weight' : scale_pos_weight,
 					'booster': 'gblinear',
-					'eval_metric': 'rmse',
-					'objective': 'reg:linear',
+					'num_class' : n_classes,
+					'eval_metric': eval_metric_,
+					'objective': objective_,
+					'nthread' : 8,
+					'silent' : 0,
+					'seed': 7
+					 }
+
+		elif type == 'linear_reg':
+			
+			if eval_metric == '':
+				eval_metric_ = 'rmse'
+			if objective == '':
+				objective_ = 'reg:linear'
+
+			space = {
+					'eta': hp.quniform('eta', 0.003, 0.1, 0.01),
+					'lambda' : hp.quniform('lambda', 0.1, 0.7, 0.15),
+					'lambda_bias' : hp.quniform('lambda_bias', 0.1, 0.7, 0.15),
+					'alpha' : hp.quniform('alpha', 0.1, 0.5, 0.1),
+					'scale_pos_weight' : scale_pos_weight,
+					'booster': 'gblinear',
+					'eval_metric': eval_metric_,
+					'objective': objective_,
 					'nthread' : 8,
 					'silent' : 0,
 					'seed': 7
@@ -240,15 +296,64 @@ def find_params_xgb(train, Y, type = 'linear', folds = 5, total_evals = 50, spar
 
 		elif type=='tree':
 
+			if eval_metric == '':
+				eval_metric_ = 'mlogloss'
+			if objective == '':
+				objective_ = 'multi:softprob'
+
 			space = {
 					'eta' : hp.quniform('eta', 0.003, 0.1, 0.01),
 					'colsample_bytree' : hp.quniform('colsample_bytree', 0.3, 0.9, 0.1),
 					'subsample' : hp.quniform('subsample', 0.6, 0.9, 0.1),
 					'max_depth' : hp.quniform('max_depth', 3, 9, 1),
+					'scale_pos_weight' : scale_pos_weight,
 					'booster': 'gbtree',
-					'num_class' : 12,
-					'eval_metric': 'mlogloss',
-					'objective': 'multi:softprob',
+					'num_class' : n_classes,
+					'eval_metric': eval_metric_,
+					'objective': objective_,
+					'nthread' : 8,
+					'silent' : 1,
+					'seed': 7
+					 }
+
+		elif type=='tree_softmax':
+
+			if eval_metric == '':
+				eval_metric_ = 'mlogloss'
+			if objective == '':
+				objective_ = 'multi:softmax'
+
+			space = {
+					'eta' : hp.quniform('eta', 0.03, 0.1, 0.01),
+					'colsample_bytree' : hp.quniform('colsample_bytree', 0.3, 0.9, 0.1),
+					'subsample' : hp.quniform('subsample', 0.6, 0.9, 0.1),
+					'max_depth' : hp.quniform('max_depth', 3, 9, 1),
+					'scale_pos_weight' : scale_pos_weight,
+					'booster': 'gbtree',
+					'num_class' : n_classes,
+					'eval_metric': eval_metric_,
+					'objective': objective_,
+					'nthread' : 8,
+					'silent' : 1,
+					'seed': 7
+					 }
+
+		elif type=='tree_binary':
+
+			if eval_metric == '':
+				eval_metric_ = 'auc'
+			if objective == '':
+				objective_ = 'binary:logistic'
+
+			space = {
+					'eta' : hp.quniform('eta', 0.003, 0.5, 0.01),
+					'colsample_bytree' : hp.quniform('colsample_bytree', 0.3, 0.9, 0.1),
+					'subsample' : hp.quniform('subsample', 0.6, 0.9, 0.1),
+					'max_depth' : hp.quniform('max_depth', 2, 12, 1),
+					'scale_pos_weight' : scale_pos_weight,
+					'booster': 'gbtree',
+					'eval_metric': eval_metric_,
+					'objective': objective_,
 					'nthread' : 8,
 					'silent' : 1,
 					'seed': 7
@@ -256,18 +361,25 @@ def find_params_xgb(train, Y, type = 'linear', folds = 5, total_evals = 50, spar
 
 		elif type=='tree_reg':
 
+			if eval_metric == '':
+				eval_metric_ = 'rmse'
+			if objective == '':
+				objective_ = 'reg:linear'
+
 			space = {
 					'eta' : hp.quniform('eta', 0.003, 0.1, 0.01),
 					'colsample_bytree' : hp.quniform('colsample_bytree', 0.3, 0.9, 0.1),
 					'subsample' : hp.quniform('subsample', 0.6, 0.9, 0.1),
 					'max_depth' : hp.quniform('max_depth', 2, 8, 1),
+					'scale_pos_weight' : scale_pos_weight,
 					'booster': 'gbtree',
-					'eval_metric': 'rmse',
-					'objective': 'reg:linear',
+					'eval_metric': eval_metric_,
+					'objective': objective_,
 					'nthread' : 8,
 					'silent' : 1,
 					'seed': 7
 					 }
+
 
 		best = hyperopt.fmin(score, space, algo=tpe.suggest, trials=trials, max_evals = int(total_evals/folds))
 		for key in space:
@@ -319,7 +431,25 @@ def train_xgb(train, Y, params, type='multiclass_classification',train_size = 0.
 
 	return model, score
 
-def predict_xgb(X, model, sparse = False):
+def predict_xgb(X, model, sparse = False, proba = True):
+	"""
+	features, fitted model -> predictions
+	"""
+	if sparse:
+		if proba:
+			preds = model.predict_proba(xgb.DMatrix(X.tocsc(), missing = np.nan))
+		else:
+			preds = model.predict(xgb.DMatrix(X.tocsc(), missing = np.nan))
+	else:
+		if proba:
+			preds = model.predict_proba(xgb.DMatrix(X, missing = np.nan))
+		else:
+			preds = model.predict(xgb.DMatrix(X, missing = np.nan))
+			
+
+	return preds
+
+def predict_classes_xgb(X, model, sparse = False):
 	"""
 	features, fitted model -> predictions
 	"""
