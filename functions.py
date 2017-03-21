@@ -41,6 +41,50 @@ def make_folds(train_y, nfolds = 3, seed = 7, type='stratified'):
 		folds.append((train_index, val_index))
 	return folds
 
+def make_numerical_interactions(train, test, colnames, order = 2):
+	new_cols = []
+	for i in xrange(len(colnames)):
+		col1 = colnames[i]
+		for j in xrange(i,len(colnames),1):
+			col2 = colnames[j]
+			
+			if order == 2:
+				train[col1 + '_' + col2] = train[col1].astype(np.float32) * train[col2].astype(np.float32)
+				test[col1 + '_' + col2] = test[col1].astype(np.float32) * train[col2].astype(np.float32)
+				new_cols.append(col1 + '_' + col2)
+			
+			elif order == 3:
+				for q in xrange(j,len(colnames),1):
+					col3 = colnames[q]
+		
+					train[col1 + '_' + col2 + '_' + col3] = train[col1].astype(np.float32) * train[col2].astype(np.float32) * train[col3].astype(np.float32)
+					test[col1 + '_' + col2 + '_' + col3] = test[col1].astype(np.float32) * train[col2].astype(np.float32) * train[col3].astype(np.float32)
+					new_cols.append(col1 + '_' + col2 + '_' + col3)
+	
+	return new_cols
+
+def make_categorical_interactions(train, test, colnames, order = 2):
+	new_cols = []
+	for i in xrange(len(colnames)):
+		col1 = colnames[i]
+		for j in xrange(i+1, len(colnames), 1):
+			col2 = colnames[j]
+			
+			if order == 2:
+				train[col1 + '_' + col2] = train[col1].astype(np.str) + train[col2].astype(np.str)
+				test[col1 + '_' + col2] = test[col1].astype(np.str) + train[col2].astype(np.str)
+				new_cols.append(col1 + '_' + col2)
+			
+			elif order == 3:
+				for q in xrange(j+1,len(colnames),1):
+					col3 = colnames[q]
+		
+					train[col1 + '_' + col2 + '_' + col3] = train[col1].astype(np.str) + train[col2].astype(np.str) + train[col3].astype(np.str)
+					test[col1 + '_' + col2 + '_' + col3] = test[col1].astype(np.str) + train[col2].astype(np.str) + train[col3].astype(np.str)
+					new_cols.append(col1 + '_' + col2 + '_' + col3)
+	
+	return new_cols
+		
 def normalize_data(train, test, is_sparse = False):
 	if is_sparse:
 		train = train.toarray()
@@ -208,8 +252,11 @@ def get_hash_data(train, test, colnames_to_hash, colnames_not_to_hash = [], type
 
 def create_mean_features(train, train_y, test, colnames_to_make_mean, folds):
 
+	new_colnames = []
 	for col_name in colnames_to_make_mean:
 		new_col_name = 'mean_' + col_name
+		new_colnames.append(new_col_name)
+		print new_col_name, colnames_to_make_mean
 		train[new_col_name] = 0.0
 		test[new_col_name] = 0.0
 
@@ -224,7 +271,7 @@ def create_mean_features(train, train_y, test, colnames_to_make_mean, folds):
 				ind = np.where(train[col_name].values[val_index] == value)[0]
 				train[new_col_name][val_index[ind]] = cur_mean_y
 				
-				print value, cur_mean_y
+				#print value, cur_mean_y
 
 		counter = Counter(train[col_name].values)
 		for value in counter:
@@ -234,10 +281,11 @@ def create_mean_features(train, train_y, test, colnames_to_make_mean, folds):
 			
 			ind = np.where(test[col_name].values == value)[0]
 			test[new_col_name][ind] = cur_mean_y
-	
+
+	return new_colnames
 	
 
-def find_params_xgb(train, Y, type = 'linear', objective='', eval_metric = '', n_classes = 2, folds = [], total_evals = 50, sparse = True, scale_pos_weight = 1, stopping_rounds = 1):
+def find_params_xgb(train, Y, type = 'linear', objective='', eval_metric = '', n_classes = 2, folds = [], total_evals = 50, sparse = True, scale_pos_weight = 1, stopping_rounds = 1, missing = np.nan):
 	"""
 	train dataset, labels, type -> dict of optimal params
 	"""
@@ -265,8 +313,8 @@ def find_params_xgb(train, Y, type = 'linear', objective='', eval_metric = '', n
 				
 				print X_train.shape, X_val.shape, y_train.shape, y_val.shape
 
-				dtrain = xgb.DMatrix(X_train.tocsc(), y_train, missing = np.nan)
-				dvalid = xgb.DMatrix(X_val.tocsc(), y_val, missing = np.nan)
+				dtrain = xgb.DMatrix(X_train.tocsc(), y_train, missing = missing)
+				dvalid = xgb.DMatrix(X_val.tocsc(), y_val, missing = missing)
 	
 			else:
 	
@@ -277,8 +325,8 @@ def find_params_xgb(train, Y, type = 'linear', objective='', eval_metric = '', n
 
 				X_train = X_train[:, :X_val.shape[1]]
 			
-				dtrain = xgb.DMatrix(X_train, y_train, missing = np.nan)
-				dvalid = xgb.DMatrix(X_val, y_val, missing = np.nan)
+				dtrain = xgb.DMatrix(X_train, y_train, missing = missing)
+				dvalid = xgb.DMatrix(X_val, y_val, missing = missing)
 			
 
 			watchlist = [(dtrain, 'train'), (dvalid, 'eval')]
@@ -294,6 +342,8 @@ def find_params_xgb(train, Y, type = 'linear', objective='', eval_metric = '', n
 
 		CV_score /= float(CVs)
 		print ("\tCV_score {0}\n\n".format(CV_score))
+
+		print params
 
 		if params['eval_metric'] != 'auc':
 			return {'loss': CV_score, 'status': STATUS_OK}
@@ -314,7 +364,7 @@ def find_params_xgb(train, Y, type = 'linear', objective='', eval_metric = '', n
 				objective_ = 'binary:logistic'
 
 			space = {
-					'eta': hp.quniform('eta', 0.03, 0.7, 0.01),
+					'eta': hp.quniform('eta', 0.1, 0.7, 0.01),
 					'lambda' : hp.quniform('lambda', 0.1, 0.7, 0.15),
 					'lambda_bias' : hp.quniform('lambda_bias', 0.1, 0.7, 0.15),
 					'alpha' : hp.quniform('alpha', 0.1, 0.5, 0.1),
@@ -468,9 +518,16 @@ def find_params_xgb(train, Y, type = 'linear', objective='', eval_metric = '', n
 	trials = Trials()
 	best = optimize(trials)
 	
+	losses = abs(np.array(trials.losses()))
+	print losses
+	if eval_metric == 'auc':
+		print 'BEST CV AUC: ', np.max(losses)
+	else:
+		print 'BEST CV LOSS: ', np.min(losses)
+
 	return best
 
-def train_xgb(train, Y, params, type='multiclass_classification',train_size = 0.9, seed = 1, sparse = False, verbose_eval = True, stopping_rounds = 3):
+def train_xgb(train, Y, params, type='multiclass_classification',train_size = 0.9, seed = 1, sparse = False, verbose_eval = True, stopping_rounds = 3, missing = np.nan):
 	"""
 	dataset, params -> fitted model and its validation score
 	"""
@@ -485,14 +542,14 @@ def train_xgb(train, Y, params, type='multiclass_classification',train_size = 0.
 	if sparse:
 	
 		X_train, X_val, y_train, y_val = train.tocsr()[train_index,:].tocoo(), train.tocsr()[val_index,:].tocoo(), Y[train_index], Y[val_index]
-		dtrain = xgb.DMatrix(X_train.tocsc(), y_train, missing = np.nan)
-		dvalid = xgb.DMatrix(X_val.tocsc(), y_val, missing = np.nan)
+		dtrain = xgb.DMatrix(X_train.tocsc(), y_train, missing = missing)
+		dvalid = xgb.DMatrix(X_val.tocsc(), y_val, missing = missing)
 	
 	else:
 	
 		X_train, X_val, y_train, y_val = train[train_index,:], train[val_index,:], Y[train_index], Y[val_index]
-		dtrain = xgb.DMatrix(X_train, y_train, missing = np.nan)
-		dvalid = xgb.DMatrix(X_val, y_val, missing = np.nan)
+		dtrain = xgb.DMatrix(X_train, y_train, missing = missing)
+		dvalid = xgb.DMatrix(X_val, y_val, missing = missing)
 	
 	watchlist = [(dtrain, 'train'), (dvalid, 'eval')]
 	
@@ -507,30 +564,30 @@ def train_xgb(train, Y, params, type='multiclass_classification',train_size = 0.
 
 	return model, score
 
-def predict_xgb(X, model, sparse = False, proba = True):
+def predict_xgb(X, model, sparse = False, proba = True, missing = np.nan):
 	"""
 	features, fitted model -> predictions
 	"""
 	if sparse:
-			preds = model.predict(xgb.DMatrix(X.tocsc(), missing = np.nan))
+			preds = model.predict(xgb.DMatrix(X.tocsc(), missing = missing))
 	else:
-		preds = model.predict(xgb.DMatrix(X, missing = np.nan))			
+		preds = model.predict(xgb.DMatrix(X, missing = missing))			
 
 	return preds
 
-def predict_classes_xgb(X, model, sparse = False):
+def predict_classes_xgb(X, model, sparse = False, missing = np.nan):
 	"""
 	features, fitted model -> predictions
 	"""
 	if sparse:
-		preds = model.predict(xgb.DMatrix(X.tocsc(), missing = np.nan))
+		preds = model.predict(xgb.DMatrix(X.tocsc(), missing = missing))
 	else:
-		preds = model.predict(xgb.DMatrix(X, missing = np.nan))
+		preds = model.predict(xgb.DMatrix(X, missing = missing))
 	
 
 	return preds
 
-def CV_evaluation(X, Y, model, type='classification', folds = [], sparse = False):
+def CV_evaluation(X, Y, model, type='classification', eval_metric = '', folds = [], sparse = False):
 	"""
 	dataset, fitted model, task , nfolds -> Cross-Validation score
 	"""
@@ -556,9 +613,19 @@ def CV_evaluation(X, Y, model, type='classification', folds = [], sparse = False
 
 		model.fit(X_train, y_train)
 
-		if type=='classification':
+		if 'classification' in type:
+		
 			preds = model.predict_proba(X_val)
-			score = log_loss(y_val, preds)
+			#preds_classes = model.predict(X_val)
+			
+			if eval_metric == '':
+				eval_function = log_loss
+			elif eval_metric == 'auc':
+				eval_function = roc_auc_score
+				preds = preds[:,1]
+				
+			score = eval_function(y_val, preds)
+		
 		else:
 			preds = model.predict(X_val)
 			score = mean_squared_error(y_val, preds)
@@ -647,7 +714,7 @@ def create_features_for_stack(X, Y, test_X, model, type='multiclass_classificati
 		elif type == 'binary_classification':
 			
 			if len(cur_preds.shape) == 2:
-				cur_preds = cur_preds[:,0]
+				cur_preds = cur_preds[:,1]
 			preds[val_index, 0] = cur_preds
 			print(preds[val_index])
 			if metric == 'logloss':
@@ -658,7 +725,7 @@ def create_features_for_stack(X, Y, test_X, model, type='multiclass_classificati
 		elif type=='regression':
 			
 			if len(cur_preds.shape) == 2:
-				cur_preds = cur_preds[:,0]
+				cur_preds = cur_preds[:,1]
 			preds[val_index,0] = cur_preds
 			if metric == 'mse':
 				score = mean_squared_error(y_val, cur_preds)
@@ -676,7 +743,7 @@ def create_features_for_stack(X, Y, test_X, model, type='multiclass_classificati
 		preds_test = predict_xgb(test_X, model_fitted, sparse = sparse_matrix)
 		if type=='binary_classification' or type == 'regression':
 			if len(preds_test.shape) == 2:
-				preds_test = preds_test[:,0]
+				preds_test = preds_test[:,1]
 			preds_test = preds_test.reshape(preds_test.shape[0],1)
 			print('test shape',preds_test.shape)
 			
@@ -685,7 +752,7 @@ def create_features_for_stack(X, Y, test_X, model, type='multiclass_classificati
 		preds_test = train_predict_keras(X, Y, test_X, model, type=type)
 		if type=='binary_classification' or type=='regression':
 			if len(preds_test.shape) == 2:
-				preds_test = preds_test[:,0]
+				preds_test = preds_test[:,1]
 			preds_test = preds_test.reshape(preds_test.shape[0],1)
 			print('test shape',preds_test.shape)
 
@@ -695,6 +762,10 @@ def create_features_for_stack(X, Y, test_X, model, type='multiclass_classificati
 	
 		model.fit(X, Y)
 		preds_test = model.predict_proba(test_X)
+		if type=='binary_classification' or type=='regression':
+			if len(preds_test.shape) == 2:
+				preds_test = preds_test[:,1]
+			preds_test = preds_test.reshape(preds_test.shape[0],1)
 	
 	if features_to_keep > 0:
 		
@@ -705,8 +776,8 @@ def create_features_for_stack(X, Y, test_X, model, type='multiclass_classificati
 			new_X_test = sparse.hstack([new_X_test, sparse.coo_matrix(preds_test)])
 		
 		else:
-			new_X_train = np.hstack(new_X_train, preds)
-			new_X_test = np.hstack(new_X_test, preds_test)
+			new_X_train = np.hstack([new_X_train, preds])
+			new_X_test = np.hstack([new_X_test, preds_test])
 	
 	else:
 		if sparse_matrix:
