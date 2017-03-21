@@ -33,6 +33,9 @@ from keras.optimizers import SGD, Adam, Adadelta
 from keras.layers.advanced_activations import LeakyReLU,PReLU,ELU
 
 def make_folds(train_y, nfolds = 3, seed = 7, type='stratified'):
+	'''
+	stratifies by y dataset into given number of folds
+	'''
 	folds = []
 	if type == 'stratified':
 		skf = StratifiedKFold(train_y, n_folds = nfolds, random_state = seed)
@@ -42,6 +45,9 @@ def make_folds(train_y, nfolds = 3, seed = 7, type='stratified'):
 	return folds
 
 def make_numerical_interactions(train, test, colnames, order = 2):
+	'''
+	create interactions of order 2 or order 3 of numeric features
+	'''
 	new_cols = []
 	for i in xrange(len(colnames)):
 		col1 = colnames[i]
@@ -64,6 +70,9 @@ def make_numerical_interactions(train, test, colnames, order = 2):
 	return new_cols
 
 def make_categorical_interactions(train, test, colnames, order = 2):
+	'''
+	create interactions of order 2 or order 3 of categorical features
+	'''
 	new_cols = []
 	for i in xrange(len(colnames)):
 		col1 = colnames[i]
@@ -86,6 +95,9 @@ def make_categorical_interactions(train, test, colnames, order = 2):
 	return new_cols
 		
 def normalize_data(train, test, is_sparse = False):
+	'''
+	perform data normalizzation
+	'''
 	if is_sparse:
 		train = train.toarray()
 		test = test.toarray()
@@ -108,7 +120,7 @@ def normalize_data(train, test, is_sparse = False):
 
 def get_hash_data_memory_efficient(train, test, colnames_to_hash, type = 'tfidf', verbose = True):
 	"""
-	Pandas dataframes train, test -> hashed values by columns 
+	hashes Pandas dataset 
 	"""
 
 	if type == 'tfidf':
@@ -143,7 +155,7 @@ def get_hash_data_memory_efficient(train, test, colnames_to_hash, type = 'tfidf'
 
 def get_hash_data_simple(train, test, colnames_to_hash, type = 'tfidf', verbose = True):
 	"""
-	Pandas dataframes train, test -> hashed values by columns 
+	hashes Pandas dataset
 	"""
 
 	if type == 'tfidf':
@@ -179,7 +191,7 @@ def get_hash_data_simple(train, test, colnames_to_hash, type = 'tfidf', verbose 
 
 def get_hash_data(train, test, colnames_to_hash, colnames_not_to_hash = [], type = 'tfidf', verbose = True):
 	"""
-	Pandas dataframes train, test -> hashed values by columns 
+	hashes Pandas dataset 
 	"""
 
 	df_all = pd.concat((copy.copy(train), copy.copy(test)), axis=0, ignore_index=True)
@@ -251,7 +263,9 @@ def get_hash_data(train, test, colnames_to_hash, colnames_not_to_hash = [], type
 	return train, test
 
 def create_mean_features(train, train_y, test, colnames_to_make_mean, folds):
-
+	'''
+	for categorical variables create columns with mean values of targets for each categorical value
+	'''
 	new_colnames = []
 	for col_name in colnames_to_make_mean:
 		new_col_name = 'mean_' + col_name
@@ -287,7 +301,7 @@ def create_mean_features(train, train_y, test, colnames_to_make_mean, folds):
 
 def find_params_xgb(train, Y, type = 'linear', objective='', eval_metric = '', n_classes = 2, folds = [], total_evals = 50, sparse = True, scale_pos_weight = 1, stopping_rounds = 1, missing = np.nan):
 	"""
-	train dataset, labels, type -> dict of optimal params
+	find dict of optimal params for xgboost
 	"""
 
 	def score(params):
@@ -529,7 +543,7 @@ def find_params_xgb(train, Y, type = 'linear', objective='', eval_metric = '', n
 
 def train_xgb(train, Y, params, type='multiclass_classification',train_size = 0.9, seed = 1, sparse = False, verbose_eval = True, stopping_rounds = 3, missing = np.nan):
 	"""
-	dataset, params -> fitted model and its validation score
+	fit xgboost model with given params
 	"""
 	if type=='multiclass_classification' or type=='binary_classification':
 		skf =  StratifiedShuffleSplit(Y, train_size=train_size, test_size = int((1.0-train_size)*train.shape[0])-1, random_state=seed)
@@ -566,7 +580,7 @@ def train_xgb(train, Y, params, type='multiclass_classification',train_size = 0.
 
 def predict_xgb(X, model, sparse = False, proba = True, missing = np.nan):
 	"""
-	features, fitted model -> predictions
+	make predictions by xgboost model
 	"""
 	if sparse:
 			preds = model.predict(xgb.DMatrix(X.tocsc(), missing = missing))
@@ -577,7 +591,7 @@ def predict_xgb(X, model, sparse = False, proba = True, missing = np.nan):
 
 def predict_classes_xgb(X, model, sparse = False, missing = np.nan):
 	"""
-	features, fitted model -> predictions
+	make classes predictions by xgboost
 	"""
 	if sparse:
 		preds = model.predict(xgb.DMatrix(X.tocsc(), missing = missing))
@@ -589,7 +603,7 @@ def predict_classes_xgb(X, model, sparse = False, missing = np.nan):
 
 def CV_evaluation(X, Y, model, type='classification', eval_metric = '', folds = [], sparse = False):
 	"""
-	dataset, fitted model, task , nfolds -> Cross-Validation score
+	get Cross-Validation score for a model
 	"""
 	CVs = 0
 	CV_score = 0.0
@@ -641,7 +655,7 @@ def CV_evaluation(X, Y, model, type='classification', eval_metric = '', folds = 
 
 def create_features_for_stack(X, Y, test_X, model, type='multiclass_classification', metric = '', features_to_keep = 'all', folds = 5, sparse_matrix = True, seed = 1, n_classes=None):
 	"""
-	train dataset, test features, model, task type -> datasets of stacked model predictions
+	create dataset of stacked model predictions
 	"""
 	if metric == '':
 		if type == 'multiclass_classification':
@@ -792,7 +806,7 @@ def create_features_for_stack(X, Y, test_X, model, type='multiclass_classificati
 
 def create_stack(X, Y, test_X, models, type='multiclass_classification', metric = '', n_classes = None, features_to_keep = 0, folds = [], sparse_matrix = True):
 	"""
-	train dataset, test features, model, task type -> datasets of stacked model predictions
+	create dataset of stacked bunch of models predictions
 	"""
 	m = 0
 	for model in models:
@@ -818,7 +832,7 @@ def create_stack(X, Y, test_X, models, type='multiclass_classification', metric 
 
 def make_mean_of_models(models, train_X, Y, test, sparse = False):
 	"""
-	models, dataset, test features -> mean predictions of models
+	average predictions of a bunch of models
 	"""
 	nmodels = len(models)
 	n = 0
@@ -846,7 +860,9 @@ def make_mean_of_models(models, train_X, Y, test, sparse = False):
 	return preds
 
 def batch_generator(X, y, batch_size, shuffle):
-
+	'''
+	batch data generator for keras models
+	'''
 	number_of_batches = X.shape[0]//batch_size
 	counter = 0
 	sample_index = np.arange(X.shape[0])
@@ -870,7 +886,7 @@ def batch_generator(X, y, batch_size, shuffle):
 
 def generate_model(params,type='multiclass_classification', n_classes = None):
 	"""
-	params -> Keras model
+	generate keras models by params
 	"""
 	hidden_sizes, input_dim, dropouts, init = params['hidden_sizes'], params['input_dim'], params['dropouts'], params['init']
 	print (hidden_sizes, input_dim, dropouts, init)
@@ -923,7 +939,7 @@ def generate_model(params,type='multiclass_classification', n_classes = None):
 
 def CV_evaluation_keras(train_X, Y, params, type='multiclass_classification', metric = '', folds = []):
 	"""
-	datasets, model params -> Cross-Validation score
+	get Cross-Validation score for keras models
 	"""
 	np.random.seed(7)
 
@@ -987,7 +1003,7 @@ def CV_evaluation_keras(train_X, Y, params, type='multiclass_classification', me
 
 def train_predict_keras(train_X, Y, test, params, type='multiclass_classification'):
 	"""
-	train dataset, test features, model params -> model and predicitons
+	fit model and get predicitons by keras model
 	"""
 	train_X = train_X.tocsr()
 	test = test.tocsr()
