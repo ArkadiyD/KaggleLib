@@ -7,8 +7,8 @@ Supports types of models:
 
 Supports tasks:
 *	Binary classification
-2.	Multiclass classification
-3.	Regression
+*	Multiclass classification
+*	Regression
 
 Contains functions for:
 * Data hashing (incl. memory-efficient versions)
