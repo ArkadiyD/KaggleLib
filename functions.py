@@ -262,39 +262,52 @@ def get_hash_data(train, test, colnames_to_hash, colnames_not_to_hash = [], type
 	
 	return train, test
 
-def create_mean_features(train, train_y, test, colnames_to_make_mean, folds):
+def create_mean_features(train, train_y, test, colnames_to_make_mean, folds, threshold = 1):
 	'''
 	for categorical variables create columns with mean values of targets for each categorical value
 	'''
+	new_column_train_values = np.zeros((train.shape[0]))
+	new_column_test_values = np.zeros((test.shape[0]))
+
+	global_mean_y = np.mean(train_y)
 	new_colnames = []
 	for col_name in colnames_to_make_mean:
 		new_col_name = 'mean_' + col_name
 		new_colnames.append(new_col_name)
 		print new_col_name, colnames_to_make_mean
-		train[new_col_name] = 0.0
-		test[new_col_name] = 0.0
+		train[new_col_name] = global_mean_y
+		test[new_col_name] = global_mean_y
 
 		for fold in folds:
 			train_index, val_index = fold[0], fold[1]
 			counter = Counter(train[col_name].values[train_index])
 			for value in counter:
+				if counter[value] < threshold:
+					continue
+
 				ind = np.where(train[col_name].values[train_index] == value)[0]
 				cur_y = train_y[train_index[ind]]
 				cur_mean_y = (np.mean(cur_y) * cur_y.shape[0] + np.mean(train_y)) / (cur_y.shape[0] + 1)
 
 				ind = np.where(train[col_name].values[val_index] == value)[0]
-				train[new_col_name][val_index[ind]] = cur_mean_y
+				new_column_train_values[val_index[ind]] = cur_mean_y
 				
 				#print value, cur_mean_y
 
 		counter = Counter(train[col_name].values)
 		for value in counter:
+			if counter[value] < threshold:
+				continue
+				
 			ind = np.where(train[col_name].values == value)[0]
 			cur_y = train_y[ind]
 			cur_mean_y = (np.mean(cur_y) * cur_y.shape[0] + np.mean(train_y)) / (cur_y.shape[0] + 1)
 			
 			ind = np.where(test[col_name].values == value)[0]
-			test[new_col_name][ind] = cur_mean_y
+			new_column_test_values[ind] = cur_mean_y
+
+		train[new_col_name] = np.copy(new_column_train_values)
+		test[new_col_name] = np.copy(new_column_train_values)
 
 	return new_colnames
 	
