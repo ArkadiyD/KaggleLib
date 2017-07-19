@@ -5,7 +5,7 @@ from sklearn.model_selection import ShuffleSplit, StratifiedShuffleSplit
 from sklearn.metrics import roc_auc_score, accuracy_score, log_loss, mean_squared_error
 
 def train_xgb(train_x, train_y, task, params, eval_metric, sparse = False, train_ratio = 0.9, stopping_rounds = -1, missing = np.nan, verbose = False, random_seed = 1):
-    '''trains xgboost models
+    """trains xgboost models
     
     Parameters
     ----------
@@ -39,7 +39,7 @@ def train_xgb(train_x, train_y, task, params, eval_metric, sparse = False, train
     Returns 
     -------
     trained xgboost model, validation score
-    '''
+    """
     
     if verbose:
         print ("Training with params : ")

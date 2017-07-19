@@ -1,5 +1,5 @@
 def predict_sklearn(val_x, model, eval_metric, task):
-    ''' makes predictions by scikit-learn model
+    """ makes predictions by scikit-learn model
 
     Parameters
     ----------
@@ -15,7 +15,7 @@ def predict_sklearn(val_x, model, eval_metric, task):
     Returns
     -------
     predictions array
-    '''
+    """
 
     if eval_metric == 'logloss' or eval_metric == 'mlogloss' or eval_metric == 'auc':
         preds_val = model.predict_proba(val_x)

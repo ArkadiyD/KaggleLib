@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 
 def logarithm(train, test, colnames):
-    '''create column transformation as logarithm(x) or logarithm(x + 1)
+    """create column transformation as logarithm(x) or logarithm(x + 1)
 
     Parameters
     ----------
@@ -16,7 +16,7 @@ def logarithm(train, test, colnames):
     Returns
     -------
     list of names of created columns
-    '''
+    """
 
     new_cols = []
     for colname in colnames:
@@ -33,7 +33,7 @@ def logarithm(train, test, colnames):
     return new_cols
 
 def exponent(train, test, colnames, type):
-    '''create exponent transformation as exp(x) or exp(-x)
+    """create exponent transformation as exp(x) or exp(-x)
 
     Parameters
     ----------
@@ -49,7 +49,7 @@ def exponent(train, test, colnames, type):
     Returns
     -------
     list of names of created columns
-    '''
+    """
 
     new_cols = []
     for colname in colnames:
@@ -66,7 +66,7 @@ def exponent(train, test, colnames, type):
     return new_cols
     
 def sigmoid(train, test, colnames):
-    '''create sigmoid transformation as 1 / (1 + exp(-x))
+    """create sigmoid transformation as 1 / (1 + exp(-x))
 
     Parameters
     ----------
@@ -80,7 +80,7 @@ def sigmoid(train, test, colnames):
     Returns
     -------
     list of names of created columns
-    '''
+    """
     new_cols = []
     for colname in colnames:
         
@@ -92,7 +92,7 @@ def sigmoid(train, test, colnames):
     return new_cols
         
 def trigonometry(train, test, colnames):
-    '''creates trigonometric transformation as sin(x), cos(x), tan(x)
+    """creates trigonometric transformation as sin(x), cos(x), tan(x)
 
     Parameters
     ----------
@@ -106,7 +106,7 @@ def trigonometry(train, test, colnames):
     Returns
     -------
     list of names of created columns
-    '''
+    """
 
     new_cols = []
     for colname in colnames:

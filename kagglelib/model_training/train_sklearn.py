@@ -1,5 +1,5 @@
 def train_sklearn(train_x, train_y, model):
-    '''trains sklearn models
+    """trains sklearn models
     
     Parameters
     ----------
@@ -13,7 +13,7 @@ def train_sklearn(train_x, train_y, model):
     Returns 
     -------
     trained sklearn model
-    '''
+    """
 
     model.model.set_params(**model.params)
     model.model = model.model.fit(train_x, train_y)

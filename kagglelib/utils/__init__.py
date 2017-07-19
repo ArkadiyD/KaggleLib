@@ -12,7 +12,7 @@ from keras.callbacks import Callback
 __all__ = ['make_folds', 'generate_keras_model', 'HistoryCallback']
 
 def make_folds(train_y, n_folds = 3, type = 'stratified', random_seed = 1, shuffle = True):
-    '''splits dataset into train and validation folds
+    """splits dataset into train and validation folds
 
     Parameters
     ----------
@@ -37,7 +37,7 @@ def make_folds(train_y, n_folds = 3, type = 'stratified', random_seed = 1, shuff
     indices of train and validation folds
     folds[i][0] - train indices in i-th train-val split
     folds[i][1] - validation indices in i-th train-val split
-    '''
+    """
 
     folds = []
     if type == 'stratified':
@@ -52,7 +52,7 @@ def make_folds(train_y, n_folds = 3, type = 'stratified', random_seed = 1, shuff
     return folds
 
 class HistoryCallback(Callback):
-    '''makes predictions on validation and, optionally, test dataset
+    """makes predictions on validation and, optionally, test dataset
     
     allows to select epoches based on validation metrics on them and aggregate predictions for test on selected epoches
 
@@ -70,7 +70,7 @@ class HistoryCallback(Callback):
         predictions on validation on every epoch
     test_predictions : list of np.ndarrays, optional
         predictions on validation on every epoch      
-    '''
+    """
 
     def __init__(self, val_x, test_x = None):
         self.val_x = val_x
@@ -86,7 +86,7 @@ class HistoryCallback(Callback):
             self.test_predictions.append(self.model.predict(self.test_x))
             
 def generate_keras_model(params, task, n_classes = None, verbose = False):
-    '''generates keras model by parameters
+    """generates keras model by parameters
     
     built model is multil-layer-perceptron with activation functions and optionally dropouts
 
@@ -121,7 +121,7 @@ def generate_keras_model(params, task, n_classes = None, verbose = False):
     indices of train and validation folds
     folds[i][0] - train indices in i-th train-val split
     folds[i][1] - validation indices in i-th train-val split
-    '''
+    """
 
     input_dim, hidden_sizes, hidden_activation, dropouts, init, output_activation = params['input_dim'], params['hidden_sizes'], params['hidden_activation'], params['dropouts'], params['init'], params['output_activation']
     if verbose:

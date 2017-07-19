@@ -1,5 +1,5 @@
 class Model:
-    '''generic wrapper for Model instance 
+    """generic wrapper for Model instance 
     
     allows to select epoches based on validation metrics on them and aggregate predictions for test on selected epoches
 
@@ -21,7 +21,7 @@ class Model:
     	fitted instance of model of corresponding type
     cv_score : float
         score on cross-validation     
-    '''
+    """
     
     def __init__(self, type, params = None):
         self.type = type

@@ -3,7 +3,7 @@ from scipy import sparse
 import pandas as pd
 
 def normalize_data(train, test, max_norm = False, is_sparse = False):
-    '''create arithmetic combinations of order 2 or order 3 for numerical features
+    """create arithmetic combinations of order 2 or order 3 for numerical features
 
     Parameters
     ----------
@@ -21,7 +21,7 @@ def normalize_data(train, test, max_norm = False, is_sparse = False):
     Returns
     -------
     normalized train, test
-    '''
+    """
     
     if is_sparse:
         train = train.toarray()

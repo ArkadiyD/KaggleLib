@@ -7,9 +7,9 @@ from ..model_predicting import predict_xgb, predict_lgbm, predict_keras, predict
 from ..model_training import train_xgb, train_lgbm, train_keras, train_sklearn
 
 def _create_features_for_stack(train_x, y, test_x, model, task = 'multiclass_classification', n_classes = None, eval_metric = '', categorical_features = [], folds = [], train_ratio = 1.0, sparse = True, stopping_rounds = -1, epochs = 100, average_epochs = -1, seed = 1, verbose = False):
-    '''
+    """
     supplementary function for stacking
-    '''
+    """
     if task == 'multiclass_classification':
         preds = np.zeros((train_x.shape[0], n_classes), dtype = np.float32)
     elif task == 'binary_classification':
@@ -126,7 +126,7 @@ def _create_features_for_stack(train_x, y, test_x, model, task = 'multiclass_cla
     return new_train_x, new_test_x, CV_score
 
 def create_stack(train_x, train_y, test_x, models, folds, task = 'multiclass_classification', eval_metric = '', categorical_features = [], n_classes = None, train_ratio = 1.0, sparse = False, stopping_rounds = [], epochs = 100, average_epochs = -1, random_seed = 1, verbose = False):
-    '''genetic algorithm for features selection
+    """genetic algorithm for features selection
     
     creates stack features based on out-of-fold techinque
     https://mlwave.com/kaggle-ensembling-guide/
@@ -185,7 +185,7 @@ def create_stack(train_x, train_y, test_x, models, folds, task = 'multiclass_cla
     Returns 
     -------
     list of best features, best CV score  (CV score with selected features)
-    '''
+    """
     m = 0
     for model in models:
         if m == 0:  

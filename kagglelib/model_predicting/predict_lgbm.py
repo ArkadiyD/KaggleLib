@@ -1,7 +1,7 @@
 import pandas as pd
 
 def predict_lgbm(val_x, model):
-    ''' makes predictions by lightgbm model
+    """ makes predictions by lightgbm model
 
     Parameters
     ----------
@@ -13,7 +13,7 @@ def predict_lgbm(val_x, model):
     Returns
     -------
     predictions array
-    '''
+    """
 
     if isinstance(val_x, pd.DataFrame):
         x = val_x.values

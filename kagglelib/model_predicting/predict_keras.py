@@ -1,5 +1,5 @@
 def predict_keras(val_x, model, eval_metric):
-    ''' makes predictions by keras neural net model
+    """ makes predictions by keras neural net model
 
     Parameters
     ----------
@@ -13,7 +13,7 @@ def predict_keras(val_x, model, eval_metric):
     Returns
     -------
     predictions array
-    '''
+    """
 
     preds_val = model.predict(val_x)
         

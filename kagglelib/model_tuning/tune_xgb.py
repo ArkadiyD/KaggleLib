@@ -7,7 +7,7 @@ from sklearn.metrics import roc_auc_score, accuracy_score, log_loss, mean_square
 
 
 def find_params_xgb(train_x, train_y, task, type, eval_metric, n_classes, folds, total_evals = 50, sparse = False, stopping_rounds = -1, missing = np.nan, verbose = False):
-    '''find optimal parameters on cross-validation for xgboost by Hyperopt
+    """find optimal parameters on cross-validation for xgboost by Hyperopt
     
     Parameters
     ----------
@@ -46,7 +46,7 @@ def find_params_xgb(train_x, train_y, task, type, eval_metric, n_classes, folds,
     Returns 
     -------
     dictionary of best parameters on cross-validation
-    '''
+    """
 
     np.random.seed(777)
 

@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 
 def predict_xgb(val_x, model, missing = np.nan):
-    ''' makes predictions by xgboost model
+    """ makes predictions by xgboost model
 
     Parameters
     ----------
@@ -18,7 +18,7 @@ def predict_xgb(val_x, model, missing = np.nan):
     Returns
     -------
     predictions array
-    '''
+    """
 
     if isinstance(val_x, pd.DataFrame):
         x = val_x.values

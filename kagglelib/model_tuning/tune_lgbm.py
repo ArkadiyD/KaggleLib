@@ -7,7 +7,7 @@ from sklearn.metrics import roc_auc_score, accuracy_score, log_loss, mean_square
 import pandas as pd
 
 def find_params_lgbm(train_x, train_y, task, categorical, eval_metric, n_classes, folds, total_evals = 50, stopping_rounds = -1, verbose = False):
-    '''find optimal parameters on cross-validation for lightgbm by Hyperopt
+    """find optimal parameters on cross-validation for lightgbm by Hyperopt
     
     Parameters
     ----------
@@ -40,7 +40,7 @@ def find_params_lgbm(train_x, train_y, task, categorical, eval_metric, n_classes
     Returns 
     -------
     dictionary of best parameters on cross-validation
-    '''
+    """
 
     np.random.seed(777)
     

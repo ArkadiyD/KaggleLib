@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 
 def make_numerical_interactions(train, test, colnames, operation, order = 2, symmetric = False):
-    '''create arithmetic combinations of order 2 or order 3 for numerical features
+    """create arithmetic combinations of order 2 or order 3 for numerical features
 
     Parameters
     ----------
@@ -24,7 +24,7 @@ def make_numerical_interactions(train, test, colnames, operation, order = 2, sym
     Returns
     -------
     list of names of created columns
-    '''
+    """
 
     new_cols = []
     for i in xrange(len(colnames)):
@@ -94,7 +94,7 @@ def make_numerical_interactions(train, test, colnames, operation, order = 2, sym
     return new_cols
 
 def make_categorical_interactions(train, test, colnames, order = 2, sep = '_'):
-    '''create multiplications of order 2 or order 3 for numerical features
+    """create multiplications of order 2 or order 3 for numerical features
 
     Parameters
     ----------
@@ -114,7 +114,7 @@ def make_categorical_interactions(train, test, colnames, order = 2, sep = '_'):
     Returns
     -------
     list of names of created columns
-    '''
+    """
     
     new_cols = []
     for i in xrange(len(colnames)):

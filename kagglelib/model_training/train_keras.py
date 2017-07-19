@@ -10,7 +10,7 @@ import keras.backend as K
 from ..utils import *
 
 def train_keras(train_x, train_y, test_x, task, params, eval_metric, n_classes = 2, train_ratio = 0.9, epochs = 1000, stopping_rounds = -1, average_epochs = -1, random_seed = 1, verbose = False):
-    '''calculates score on cross-validation for keras models
+    """calculates score on cross-validation for keras models
     
     Parameters
     ----------
@@ -51,7 +51,7 @@ def train_keras(train_x, train_y, test_x, task, params, eval_metric, n_classes =
     Returns 
     -------
     trained keras model, validation score, (optional) predictions on test
-    '''    
+    """    
 
     K.clear_session()
     

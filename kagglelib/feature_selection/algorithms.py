@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 
 def genetic_feature_selection(train_x, train_y, task, model, folds, eval_metric, categorical_features = [], n_classes = 2, sparse = False, iterations = 100, generation_size = 20, generation_best_ratio = 10, mutation_prob = 0.05, stopping_rounds = -1, epochs = None, average_epochs = None, missing = np.nan, verbose = False):
-    '''genetic algorithm for features selection
+    """genetic algorithm for features selection
     
     all features are encoded  as binary vector
 
@@ -63,7 +63,7 @@ def genetic_feature_selection(train_x, train_y, task, model, folds, eval_metric,
     Returns 
     -------
     list of best features, best CV score  (CV score with selected features)
-    '''
+    """
     
     np.random.seed(1)
 

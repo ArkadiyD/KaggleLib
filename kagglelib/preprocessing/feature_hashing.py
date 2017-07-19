@@ -7,7 +7,7 @@ import copy
 from scipy import sparse
 
 def hash_data(train, test, colnames_to_hash, type = 'tfidf', min_df = 0.001, max_df = 0.999, binary = False, sep = '_', verbose = True):
-    ''' hashes text features
+    """ hashes text features
     
     It is assumed that in colnames_to_hash columns there are text values which may be separaterd by single space
     Hashing is performed with respect to column, the same words in different columns are treated as different words,
@@ -42,7 +42,7 @@ def hash_data(train, test, colnames_to_hash, type = 'tfidf', min_df = 0.001, max
     Returns
     -------
     predictions array
-    '''
+    """
 
     colnames_not_to_hash = list(set(train.columns.values) - set(colnames_to_hash))
     df_all = pd.concat((train.copy(), test.copy()), axis = 0, ignore_index = True)

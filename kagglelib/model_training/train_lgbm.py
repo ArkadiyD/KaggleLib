@@ -5,7 +5,7 @@ import pandas as pd
 from sklearn.model_selection import ShuffleSplit, StratifiedShuffleSplit
 
 def train_lgbm(train_x, train_y, task, params, categorical, eval_metric, train_ratio = 0.9, stopping_rounds = -1, verbose = False, random_seed = 1):
-    '''calculates score on cross-validation for lightgbm models
+    """calculates score on cross-validation for lightgbm models
     
     Parameters
     ----------
@@ -37,7 +37,7 @@ def train_lgbm(train_x, train_y, task, params, categorical, eval_metric, train_r
     Returns 
     -------
     trained lightgbm model, validation score
-    '''    
+    """    
 
     if verbose:
         print ("Training with params : ")

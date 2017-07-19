@@ -4,7 +4,7 @@ from collections import Counter
 from ..utils import make_folds
 
 def categorical_target_encoding(train_x, train_y, test_x, colnames_to_encode, folds, simple_scheme = True, inner_n_folds = 3, inner_seed = 1, inner_type = '', threshold = 1, alpha = 1, verbose = False):
-    '''encoding categorical features with wighted target value
+    """encoding categorical features with wighted target value
     
     samples with value X of a categorical feature are encoded with value (cur_mean * K + alpha * overall_mean) / (K + alpha):
         cur_mean - mean target for samples with value X for current feature
@@ -52,7 +52,7 @@ def categorical_target_encoding(train_x, train_y, test_x, colnames_to_encode, fo
     Returns 
     -------
     list of names of created columns
-    '''
+    """
     
     new_column_train_values = np.zeros((train_x.shape[0]))
     new_column_test_values = np.zeros((test_x.shape[0]))

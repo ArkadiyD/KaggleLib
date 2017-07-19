@@ -12,7 +12,7 @@ from ..model_training import *
 from ..utils import *
 
 def CV_score_xgb(train_x, train_y, params, eval_metric, folds, sparse = False, stopping_rounds = -1, missing = np.nan, verbose = False):
-    '''calculates score on cross-validation for xgboost models
+    """calculates score on cross-validation for xgboost models
     
     Parameters
     ----------
@@ -42,7 +42,7 @@ def CV_score_xgb(train_x, train_y, params, eval_metric, folds, sparse = False, s
     Returns 
     -------
     cross-validation score
-    '''
+    """
 
     CV_score = 0.0
 
@@ -119,7 +119,7 @@ def CV_score_xgb(train_x, train_y, params, eval_metric, folds, sparse = False, s
     return CV_score
 
 def CV_score_lgbm(train_x, train_y, params, categorical, eval_metric, folds, stopping_rounds = -1, verbose = False):
-    '''calculates score on cross-validation for lightgbm models
+    """calculates score on cross-validation for lightgbm models
     
     Parameters
     ----------
@@ -147,7 +147,7 @@ def CV_score_lgbm(train_x, train_y, params, categorical, eval_metric, folds, sto
     Returns 
     -------
     cross-validation score
-    '''    
+    """    
 
     CV_score = 0.0
 
@@ -229,7 +229,7 @@ def CV_score_lgbm(train_x, train_y, params, categorical, eval_metric, folds, sto
     return CV_score
 
 def CV_score_sklearn(train_x, train_y, model, task, eval_metric, folds, verbose = False):
-    '''calculates score on cross-validation for sklearn models
+    """calculates score on cross-validation for sklearn models
     
     Parameters
     ----------
@@ -254,7 +254,7 @@ def CV_score_sklearn(train_x, train_y, model, task, eval_metric, folds, verbose 
     Returns 
     -------
     cross-validation score
-    '''    
+    """    
 
     CV_score = 0.0
 
@@ -317,7 +317,7 @@ def CV_score_sklearn(train_x, train_y, model, task, eval_metric, folds, verbose 
     return CV_score
 
 def CV_score_keras(train_x, train_y, task, params, eval_metric, folds, n_classes = None, epochs = 1000, stopping_rounds = -1, average_epochs = -1, verbose = False):
-    '''calculates score on cross-validation for keras models
+    """calculates score on cross-validation for keras models
     
     Parameters
     ----------
@@ -354,7 +354,7 @@ def CV_score_keras(train_x, train_y, task, params, eval_metric, folds, n_classes
     Returns 
     -------
     cross-validation score
-    '''    
+    """    
 
     CV_score = 0.0
 
