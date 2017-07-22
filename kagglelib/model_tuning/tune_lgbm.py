@@ -153,7 +153,7 @@ def find_params_lgbm(train_x, train_y, task, categorical, eval_metric, n_classes
             'task': 'train',
             'boosting_type': hp.choice('boosting_type', ['gbdt', 'dart']),
             'objective': objective,
-            'metric': eval_metric,
+            'metric': metric,
             'num_leaves': hp.quniform('num_leaves', 30, 150, 5),
             'max_depth': hp.quniform('max_depth', 3, 15, 1),
             'feature_fraction': hp.uniform('feature_fraction', 0.6, 0.97),
