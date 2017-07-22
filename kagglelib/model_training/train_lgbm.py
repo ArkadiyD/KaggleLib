@@ -88,7 +88,7 @@ def train_lgbm(train_x, train_y, task, params, categorical, eval_metric, train_r
         model = lgb.train(params, train_data)
     
     else:
-        model = lgb.train(params, train_data, num_boost_round = 1000, valid_sets = valid_data, verbose_eval = verbose, early_stopping_rounds = stopping_rounds)
+        model = lgb.train(params, train_data, num_boost_round = 1000, valid_sets = [valid_data], verbose_eval = verbose, early_stopping_rounds = stopping_rounds)
 
     if train_ratio < 1:
         if isinstance(X_val, pd.DataFrame):

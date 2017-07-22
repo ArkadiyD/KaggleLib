@@ -101,7 +101,7 @@ def find_params_lgbm(train_x, train_y, task, categorical, eval_metric, n_classes
                     preds_val = model.predict(X_val)
 
             else:
-                model = lgb.train(params, train_data, num_boost_round = 1000, valid_sets = valid_data, verbose_eval = verbose, early_stopping_rounds = stopping_rounds)
+                model = lgb.train(params, train_data, num_boost_round = 1000, valid_sets = [valid_data], verbose_eval = verbose, early_stopping_rounds = stopping_rounds)
                 if isinstance(X_val, pd.DataFrame):
                     preds_val = model.predict(X_val.values, num_iteration = model.best_iteration)
                 else:
