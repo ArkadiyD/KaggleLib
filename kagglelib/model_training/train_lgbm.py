@@ -67,8 +67,8 @@ def train_lgbm(train_x, train_y, task, params, categorical, eval_metric, train_r
         X_train = train_x.iloc[train_index,:]
         X_val = train_x.iloc[val_index,:]
     
-        train_data = lgb.Dataset(X_train.values, label = y_train, free_raw_data = True, feature_name = 'auto', categorical_feature = categorical)
-        valid_data = lgb.Dataset(X_val.values, label = y_val, free_raw_data = True, feature_name = 'auto', categorical_feature = categorical)
+        train_data = lgb.Dataset(X_train, label = y_train, free_raw_data = True, feature_name = 'auto', categorical_feature = categorical)
+        valid_data = lgb.Dataset(X_val, label = y_val, free_raw_data = True, feature_name = 'auto', categorical_feature = categorical)
      
     else:
         X_train = train_x[train_index]
@@ -92,7 +92,7 @@ def train_lgbm(train_x, train_y, task, params, categorical, eval_metric, train_r
 
     if train_ratio < 1:
         if isinstance(X_val, pd.DataFrame):
-            preds_val = model.predict(X_val.values, num_iteration = -1)
+            preds_val = model.predict(X_val, num_iteration = -1)
         else:
             preds_val = model.predict(X_val, num_iteration = -1)
         

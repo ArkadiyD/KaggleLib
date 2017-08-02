@@ -166,17 +166,13 @@ def CV_score_lgbm(train_x, train_y, params, categorical, eval_metric, folds, sto
     
         if isinstance(train_x, pd.DataFrame):
             X_train = train_x.ix[train_index]
-            X_val = train_x.ix[val_index]
-        
-            train_data = lgbm.Dataset(X_train.values, label = y_train, feature_name = 'auto', categorical_feature = categorical)
-            valid_data = lgbm.Dataset(X_val.values, label = y_val, feature_name = 'auto', categorical_feature = categorical)
-
+            X_val = train_x.ix[val_index]       
         else:
             X_train = train_x[train_index]
             X_val = train_x[val_index]
 
-            train_data = lgbm.Dataset(X_train, label = y_train, feature_name = 'auto', categorical_feature = categorical)
-            valid_data = lgbm.Dataset(X_val, label = y_val, feature_name = 'auto', categorical_feature = categorical)
+        train_data = lgbm.Dataset(X_train, label = y_train, feature_name = 'auto', categorical_feature = categorical)
+        valid_data = lgbm.Dataset(X_val, label = y_val, feature_name = 'auto', categorical_feature = categorical)
             
                      
         params['max_depth'] = int(params['max_depth'])
@@ -188,18 +184,12 @@ def CV_score_lgbm(train_x, train_y, params, categorical, eval_metric, folds, sto
         if stopping_rounds < 0:
             params['num_boost_round'] = int(params['num_boost_round'])
             model = lgbm.train(params, train_data)
-            if isinstance(train_x, pd.DataFrame):
-                preds_val = model.predict(X_val.values)
-            else:
-                preds_val = model.predict(X_val)
+            preds_val = model.predict(X_val)
 
         else:
             model = lgbm.train(params, train_data, num_boost_round = 1000, valid_sets = valid_data, verbose_eval = verbose, early_stopping_rounds = stopping_rounds)
-            if isinstance(train_x, pd.DataFrame):
-                preds_val = model.predict(X_val.values, num_iteration = model.best_iteration)
-            else:
-                preds_val = model.predict(X_val, num_iteration = model.best_iteration)
-
+            preds_val = model.predict(X_val, num_iteration = model.best_iteration)
+            
         if eval_metric == 'auc':
             score = roc_auc_score(y_val, preds_val)
         elif eval_metric == 'logloss':

@@ -15,10 +15,5 @@ def predict_lgbm(val_x, model):
     predictions array
     """
 
-    if isinstance(val_x, pd.DataFrame):
-        x = val_x.values
-    else:
-        x = val_x
-
     preds = model.predict(x, num_iteration = -1)
     return preds
