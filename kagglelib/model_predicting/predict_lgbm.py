@@ -15,5 +15,5 @@ def predict_lgbm(val_x, model):
     predictions array
     """
 
-    preds = model.predict(x, num_iteration = -1)
+    preds = model.predict(val_x, num_iteration = -1)
     return preds
