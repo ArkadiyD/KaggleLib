@@ -10,7 +10,7 @@ All dependencies listed in ```requirements.txt```
 0. clone repository
 1. ```cd KaggleLib```
 2. ```pip install -r requirements.txt```
-3 ```pip install .```
+3. ```pip install .```
 4. check installation by running example: ```python examples/example.py```
 
 # API
